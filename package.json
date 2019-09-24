@@ -1,0 +1,22 @@
+{
+  "name": "webgl3drenderer",
+  "version": "1.0.0",
+  "description": "3D PBR WIP renderer",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently --kill-others \"webpack watch --dev\" \"tsc --watch\"",
+    "build": "webpack --config webpack.config.js"
+  },
+  "author": "Abdullah Amr",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/gl-matrix": "^2.4.5",
+    "typescript": "^3.6.3",
+    "webpack": "^4.40.2",
+    "webpack-cli": "^3.3.9",
+    "webpack-dev-server": "^3.8.1"
+  },
+  "dependencies": {
+    "gl-matrix": "^3.1.0"
+  }
+}
