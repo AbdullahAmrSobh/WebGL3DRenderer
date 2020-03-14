@@ -1,15 +1,33 @@
-declare var gl: WebGLRenderingContext;
+import { gl } from "Engine/gl";
+
+export namespace Unifroms {
+
+    export class UnifromElement {
+        constructor(
+            public name: string,
+            public shader: Shader
+        ) {}        
+    }
+
+    export class UnifromLayout { 
+    }
+}
 
 export class Shader {
-    public readonly shaderProgram: WebGLShader;
+    public shaderProgram: WebGLProgram;
+    public static count: number = 0;
     constructor(
-        public name: string = "new shader",
+        public name: string = "new_shader_" + Shader.count,
         vertexShaderSource: string,
         fragmentShaderSource: string,
         ) {
+            Shader.count++;
             this.shaderProgram = this.createDefaultShader(vertexShaderSource, fragmentShaderSource);
     }
-    private createDefaultShader(vertexShaderSource: string, fragmentShaderSource: string): WebGLShader{ 
+
+
+
+    private createDefaultShader(vertexShaderSource: string, fragmentShaderSource: string): WebGLProgram{ 
         const program: WebGLProgram = gl.createProgram() as WebGLProgram;
         const vertexShader: any = gl.createShader(gl.VERTEX_SHADER);        
         const fragShader: any = gl.createShader(gl.FRAGMENT_SHADER);
@@ -39,16 +57,35 @@ export class Shader {
             console.error('ERROR validating program!', gl.getProgramInfoLog(program));
         }
 
-        gl.useProgram(program);
         return program;
     }
 
     public bind(): void { 
-        gl.useProgram(this.shaderProgram)
+        gl.useProgram(this.shaderProgram);
     }
 
     public unbind(): void { 
         gl.useProgram(0);
+    }
+}
+
+export namespace Shader {
+
+    export class UnifromElement { 
+        constructor(
+            public name: string, 
+            public type: string,
+            ){
+
+            }
+    }
+
+    export class UnifromLayout { 
+        public unifroms: UnifromElement[] = [];
+
+        public addUnifrom(unifrom: UnifromElement): void {
+            this.unifroms.push(unifrom);
+        }
     }
 }
 
@@ -61,7 +98,7 @@ export class ShaderLibrary {
     }
 
     private currentShaderIndex: number = 0;
-    public get(name: string) {
+    public get(name: string): Shader | null{
         this.currentShaderIndex = 0;
         for (const shader of this.shaders) {
             if(this.shaderNames[this.currentShaderIndex] === name) {
@@ -69,6 +106,7 @@ export class ShaderLibrary {
             }
             this.currentShaderIndex++;
         }
+        return null;
     }
 
 }

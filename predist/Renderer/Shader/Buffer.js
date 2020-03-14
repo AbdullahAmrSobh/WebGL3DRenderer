@@ -13,6 +13,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+var gl_1 = require("Engine/gl");
 var Buffer = /** @class */ (function () {
     function Buffer() {
     }
@@ -65,17 +66,17 @@ exports.Buffer = Buffer;
         };
         BufferElement.ShaderDataTypeToWebGLBaseType = function (type) {
             switch (type) {
-                case ShaderDataType.Float: return gl.FLOAT;
-                case ShaderDataType.Float2: return gl.FLOAT;
-                case ShaderDataType.Float3: return gl.FLOAT;
-                case ShaderDataType.Float4: return gl.FLOAT;
-                case ShaderDataType.Mat3: return gl.FLOAT;
-                case ShaderDataType.Mat4: return gl.FLOAT;
-                case ShaderDataType.Int: return gl.INT;
-                case ShaderDataType.Int2: return gl.INT;
-                case ShaderDataType.Int3: return gl.INT;
-                case ShaderDataType.Int4: return gl.INT;
-                case ShaderDataType.Bool: return gl.BOOL;
+                case ShaderDataType.Float: return gl_1.gl.FLOAT;
+                case ShaderDataType.Float2: return gl_1.gl.FLOAT;
+                case ShaderDataType.Float3: return gl_1.gl.FLOAT;
+                case ShaderDataType.Float4: return gl_1.gl.FLOAT;
+                case ShaderDataType.Mat3: return gl_1.gl.FLOAT;
+                case ShaderDataType.Mat4: return gl_1.gl.FLOAT;
+                case ShaderDataType.Int: return gl_1.gl.INT;
+                case ShaderDataType.Int2: return gl_1.gl.INT;
+                case ShaderDataType.Int3: return gl_1.gl.INT;
+                case ShaderDataType.Int4: return gl_1.gl.INT;
+                case ShaderDataType.Bool: return gl_1.gl.BOOL;
             }
             console.log("Unknown ShaderDataType!");
             return 0;
@@ -129,16 +130,16 @@ var VertexBuffer = /** @class */ (function (_super) {
         var _this = _super.call(this) || this;
         _this.vertices = vertices;
         _this.size = size;
-        _this.bufferObject = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, _this.bufferObject);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+        _this.bufferObject = gl_1.gl.createBuffer();
+        gl_1.gl.bindBuffer(gl_1.gl.ARRAY_BUFFER, _this.bufferObject);
+        gl_1.gl.bufferData(gl_1.gl.ARRAY_BUFFER, new Float32Array(vertices), gl_1.gl.STATIC_DRAW);
         return _this;
     }
     VertexBuffer.prototype.bind = function () {
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.bufferObject);
+        gl_1.gl.bindBuffer(gl_1.gl.ARRAY_BUFFER, this.bufferObject);
     };
     VertexBuffer.prototype.unbind = function () {
-        gl.bindBuffer(gl.ARRAY_BUFFER, 0);
+        gl_1.gl.bindBuffer(gl_1.gl.ARRAY_BUFFER, 0);
     };
     VertexBuffer.prototype.setLayout = function (layout) {
         this.layout = layout;
@@ -155,16 +156,16 @@ var IndexBuffer = /** @class */ (function (_super) {
         var _this = _super.call(this) || this;
         _this.indices = indices;
         _this.size = size;
-        _this.bufferObject = gl.createBuffer();
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, _this.bufferObject);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Float32Array(indices), gl.STATIC_DRAW);
+        _this.bufferObject = gl_1.gl.createBuffer();
+        gl_1.gl.bindBuffer(gl_1.gl.ELEMENT_ARRAY_BUFFER, _this.bufferObject);
+        gl_1.gl.bufferData(gl_1.gl.ELEMENT_ARRAY_BUFFER, new Float32Array(indices), gl_1.gl.STATIC_DRAW);
         return _this;
     }
     IndexBuffer.prototype.bind = function () {
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.bufferObject);
+        gl_1.gl.bindBuffer(gl_1.gl.ELEMENT_ARRAY_BUFFER, this.bufferObject);
     };
     IndexBuffer.prototype.unbind = function () {
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0);
+        gl_1.gl.bindBuffer(gl_1.gl.ELEMENT_ARRAY_BUFFER, 0);
     };
     IndexBuffer.prototype.setLayout = function (layout) {
         this.layout = layout;
@@ -182,33 +183,31 @@ var VertexArray = /** @class */ (function (_super) {
     __extends(VertexArray, _super);
     function VertexArray() {
         var _this = _super.call(this) || this;
-        _this.rendererID = gl.createBuffer();
         _this.vertexBufferIndex = 0;
         _this.vertexBuffers = [];
         return _this;
     }
     VertexArray.prototype.bind = function () {
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.rendererID);
+        gl_1.gl.bindBuffer(gl_1.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
     };
     VertexArray.prototype.unbind = function () {
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.rendererID);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.rendererID);
+        gl_1.gl.bindBuffer(gl_1.gl.ARRAY_BUFFER, this.indexBuffer);
+        gl_1.gl.bindBuffer(gl_1.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
     };
     VertexArray.prototype.addVertexBuffer = function (vertexBuffer) {
-        console.warn("Vertex Buffer has no layout!");
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.rendererID);
+        gl_1.gl.bindBuffer(gl_1.gl.ARRAY_BUFFER, vertexBuffer.bufferObject);
         vertexBuffer.bind();
         var layout = vertexBuffer.getLayout();
         for (var _i = 0, _a = layout.getElements(); _i < _a.length; _i++) {
             var element = _a[_i];
-            gl.enableVertexAttribArray(this.vertexBufferIndex);
-            gl.vertexAttribPointer(this.vertexBufferIndex, element.getComponentCount(), Buffer.BufferElement.ShaderDataTypeToWebGLBaseType(element.type), element.normalizd ? true : false, layout.getStride(), element.offset);
+            gl_1.gl.enableVertexAttribArray(this.vertexBufferIndex);
+            gl_1.gl.vertexAttribPointer(this.vertexBufferIndex, element.getComponentCount(), Buffer.BufferElement.ShaderDataTypeToWebGLBaseType(element.type), element.normalizd ? true : false, layout.getStride(), element.offset);
             this.vertexBufferIndex++;
         }
         this.vertexBuffers.push(vertexBuffer);
     };
     VertexArray.prototype.setIndexBuffer = function (indexBuffer) {
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.rendererID);
+        gl_1.gl.bindBuffer(gl_1.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer.bufferObject);
         indexBuffer.bind();
         this.indexBuffer = indexBuffer;
     };

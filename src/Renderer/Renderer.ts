@@ -1,30 +1,53 @@
-import { Buffer, VertexArray } from "Engine/Renderer/Shader/Buffer";
+import { VertexArray, VertexBuffer, IndexBuffer } from "Engine/Renderer/Buffer";
 import { Shader } from "./Shader/Shader";
 import { mat4 } from "gl-matrix";
 
-declare var gl: WebGLRenderingContext;
+import { gl } from "Engine/gl";
 
-export namespace RenderCommands { 
-    let renderQueue: any[] = [];
-    let renderLayerStack: any[] = [];
-    
+
+import { Buffer } from "Engine/Renderer/Buffer";
+import { Components } from "Engine/Core/CoreComponents/Components";
+
+export interface MVP_Matrix {
+    model: mat4;
+    view: mat4;
+    proj: mat4;
 }
 
-export class RenderManager {
+
+export class RenderCommands {
     public static projectionViewMatrix: mat4 = mat4.create();
-    constructor(canvas: HTMLCanvasElement) { 
-        gl = canvas.getContext("webgl") as WebGLRenderingContext;
+
+
+    public static initRenderer() { 
+        gl.enable(gl.DEPTH_TEST);
     }
 
+    public static uploadObject(mesh: Components.StaticMesh, layout: Buffer.BufferLayout, shader: WebGLProgram): VertexArray { 
+        let vao = new VertexArray(shader);
+        const vbo = new VertexBuffer(shader, mesh.vertcies, mesh.vertcies.length);
+        vbo.setLayout(layout);
+        const ibo = new IndexBuffer(mesh.indcies, mesh.indcies.length);
+        vao.addVertexBuffer(vbo);
+        vao.setIndexBuffer(ibo);
+        vao.unbind();
+        return vao;
+    }
 
-
-    public static Submit(shader: Shader, vertexArray: VertexArray, transform: mat4): void { 
+    public static Submit(shader: Shader, vertexArray: VertexArray, transform: MVP_Matrix): void { 
         shader.bind();
-        const projUniformLocation = gl.getUniformLocation(shader, "u_ViewProjection");
-        gl.uniformMatrix4fv(projUniformLocation, false, RenderManager.projectionViewMatrix);
-        const transformUniformLocation = gl.getUniformLocation(shader, "u_Transform");
-        gl.uniformMatrix4fv(transformUniformLocation, false, transform);
+        
+        var matWorldUniformLocation = gl.getUniformLocation(shader.shaderProgram, 'mWorld');
+        var matViewUniformLocation = gl.getUniformLocation(shader.shaderProgram, 'mView');
+        var matProjUniformLocation = gl.getUniformLocation(shader.shaderProgram, 'mProj');
+        gl.uniformMatrix4fv(matWorldUniformLocation, false, transform.model);
+        gl.uniformMatrix4fv(matViewUniformLocation, false, transform.view);
+        gl.uniformMatrix4fv(matProjUniformLocation, false, transform.proj);
         vertexArray.bind();
-        gl.drawElements(gl.TRIANGLES, vertexArray.getIndexBuffer().getCount(), gl.UNSIGNED_INT, 0);
+        gl.drawElements(gl.TRIANGLES, vertexArray.getIndexBuffer().getCount(), gl.UNSIGNED_SHORT, 0);
     }
 }
+
+
+
+

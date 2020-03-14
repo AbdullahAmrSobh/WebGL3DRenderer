@@ -13,58 +13,52 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var gl_matrix_1 = require("gl-matrix");
-var EObject = /** @class */ (function () {
-    function EObject() {
-        this.components = [];
-    }
-    EObject.prototype.AttachNewComponent = function (comp) {
-        this.components.push(comp);
-    };
-    return EObject;
-}());
-exports.EObject = EObject;
-(function (EObject) {
-    var Component = /** @class */ (function () {
-        function Component(name) {
-            this.name = name;
+var CoreComponents;
+(function (CoreComponents) {
+    var BaseComponent = /** @class */ (function () {
+        function BaseComponent() {
         }
-        return Component;
+        return BaseComponent;
     }());
-    EObject.Component = Component;
+    CoreComponents.BaseComponent = BaseComponent;
     var Transfrom = /** @class */ (function (_super) {
         __extends(Transfrom, _super);
         function Transfrom(position, rotation, scale) {
-            if (position === void 0) { position = gl_matrix_1.vec3.fromValues(0, 0, 0); }
-            if (rotation === void 0) { rotation = gl_matrix_1.vec3.fromValues(0, 0, 0); }
-            if (scale === void 0) { scale = gl_matrix_1.vec3.fromValues(0, 0, 0); }
-            var _this = _super.call(this, "Transform") || this;
+            var _this = _super.call(this) || this;
             _this.position = position;
             _this.rotation = rotation;
             _this.scale = scale;
             return _this;
         }
-        Transfrom.prototype.getYaw = function () {
-            return 0;
-        };
-        Transfrom.prototype.getPitch = function () {
-            return 0;
-        };
-        Transfrom.prototype.getRoll = function () {
-            return 0;
-        };
         return Transfrom;
-    }(Component));
-    EObject.Transfrom = Transfrom;
-    var Renderable = /** @class */ (function (_super) {
-        __extends(Renderable, _super);
-        function Renderable(shader) {
-            var _this = _super.call(this, "Renderable") || this;
-            _this.shader = shader;
-            return _this;
+    }(BaseComponent));
+    CoreComponents.Transfrom = Transfrom;
+})(CoreComponents = exports.CoreComponents || (exports.CoreComponents = {}));
+var Actor = /** @class */ (function () {
+    function Actor() {
+        this.components = [];
+    }
+    Actor.prototype.addComponent = function (component) {
+        this.components.push(component);
+    };
+    Actor.prototype.getComponent = function (name) {
+        for (var _i = 0, _a = this.components; _i < _a.length; _i++) {
+            var component = _a[_i];
+            if (component.name !== undefined && component.name === name) {
+                return component;
+            }
         }
-        return Renderable;
-    }(Component));
-    EObject.Renderable = Renderable;
-})(EObject = exports.EObject || (exports.EObject = {}));
-exports.EObject = EObject;
+        return null;
+    };
+    Actor.prototype.hasComponent = function (name) {
+        for (var _i = 0, _a = this.components; _i < _a.length; _i++) {
+            var component = _a[_i];
+            if (component.name !== undefined && component.name === name) {
+                return true;
+            }
+        }
+        return false;
+    };
+    return Actor;
+}());
+exports.Actor = Actor;

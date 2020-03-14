@@ -1,4 +1,4 @@
-declare var gl: WebGLRenderingContext;
+import { gl } from "Engine/gl";
 
 export abstract class Buffer {
     public abstract bind(): void;
@@ -13,10 +13,13 @@ export namespace Buffer {
         constructor(
             public name: string,
             public type: ShaderDataType,
-            public size: number = shaderDataTypeSize(type),
+            public size: number = 0,
             public offset: number = 0,
             public normalizd: boolean = false
-        ) { }
+        ) { 
+
+            this.size = this.getComponentCount();
+        }
 
         public getComponentCount(): number {
             switch (this.type) {
@@ -39,17 +42,17 @@ export namespace Buffer {
 
         public static ShaderDataTypeToWebGLBaseType(type: ShaderDataType) {
             switch (type) {
-                case ShaderDataType.Float: return gl.FLOAT;
+                case ShaderDataType.Float:  return gl.FLOAT;
                 case ShaderDataType.Float2: return gl.FLOAT;
                 case ShaderDataType.Float3: return gl.FLOAT;
                 case ShaderDataType.Float4: return gl.FLOAT;
-                case ShaderDataType.Mat3: return gl.FLOAT;
-                case ShaderDataType.Mat4: return gl.FLOAT;
-                case ShaderDataType.Int: return gl.INT;
-                case ShaderDataType.Int2: return gl.INT;
-                case ShaderDataType.Int3: return gl.INT;
-                case ShaderDataType.Int4: return gl.INT;
-                case ShaderDataType.Bool: return gl.BOOL;
+                case ShaderDataType.Mat3:   return gl.FLOAT;
+                case ShaderDataType.Mat4:   return gl.FLOAT;
+                case ShaderDataType.Int:    return gl.INT;
+                case ShaderDataType.Int2:   return gl.INT;
+                case ShaderDataType.Int3:   return gl.INT;
+                case ShaderDataType.Int4:   return gl.INT;
+                case ShaderDataType.Bool:   return gl.BOOL;
             }
 
             console.log("Unknown ShaderDataType!");
@@ -60,7 +63,7 @@ export namespace Buffer {
 
         private stride: number = 0;
 
-        constructor(public readonly elements: BufferElement[]) {
+        constructor(public elements: BufferElement[]) {
             this.calculateOffsetsAndStride();
         }
 
@@ -79,44 +82,37 @@ export namespace Buffer {
 
     }
 
-    function shaderDataTypeSize(type: ShaderDataType) {
-        switch (type) {
-            case ShaderDataType.Float: return 4;
-            case ShaderDataType.Float2: return 4 * 2;
-            case ShaderDataType.Float3: return 4 * 3;
-            case ShaderDataType.Float4: return 4 * 4;
-            case ShaderDataType.Mat3: return 4 * 3 * 3;
-            case ShaderDataType.Mat4: return 4 * 4 * 4;
-            case ShaderDataType.Int: return 4;
-            case ShaderDataType.Int2: return 4 * 2;
-            case ShaderDataType.Int3: return 4 * 3;
-            case ShaderDataType.Int4: return 4 * 4;
-            case ShaderDataType.Bool: return 1;
-        }
-        console.warn("Unknown ShaderDataType!");
-        return 0;
-    }
 }
 
 export class VertexBuffer extends Buffer {
-    readonly bufferObject = gl.createBuffer();
-    private  layout!: Buffer.BufferLayout;
+    public readonly bufferObject: WebGLBuffer;
+    private layout!: Buffer.BufferLayout;
 
+    public isBound: boolean;
     constructor(
+        public readonly shaderProgram: WebGLShader,
         public readonly vertices: number[],
         public readonly size: number
     ) {
         super();
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.bufferObject);
+        this.bufferObject =  gl.createBuffer() as WebGLBuffer;
+        this.isBound = true;
+
+        this.bind();
+
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+        this.unbind();
     }
 
     public bind(): void {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.bufferObject);
+        this.isBound = true;
+
     }
 
     public unbind(): void {
-        gl.bindBuffer(gl.ARRAY_BUFFER, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        this.isBound = false;
     }
 
 
@@ -130,16 +126,17 @@ export class VertexBuffer extends Buffer {
 }
 
 export class IndexBuffer extends Buffer {
-    readonly bufferObject = gl.createBuffer();
-    private  layout!: Buffer.BufferLayout;
+    readonly bufferObject = gl.createBuffer() as WebGLBuffer;
 
     constructor(
         public readonly indices: number[],
         public readonly size: number
     ) {
         super();
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.bufferObject);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Float32Array(indices), gl.STATIC_DRAW);
+        this.bind();
+        console.log("uploading indecies");
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+        this.unbind();
     }
 
     public bind(): void {
@@ -147,70 +144,85 @@ export class IndexBuffer extends Buffer {
     }
 
     public unbind(): void {
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
     }
 
-
-    public setLayout(layout: Buffer.BufferLayout): void {
-        this.layout = layout;
-    }
-
-    public getLayout(): Buffer.BufferLayout {
-        return this.layout
-    }
-
-    public getCount(): number { 
+    public getCount(): number {
         return this.indices.length;
     }
 }
+
 export class VertexArray extends Buffer {
 
-    private rendererID: WebGLBuffer = gl.createBuffer() as WebGLBuffer;
-    private vertexBufferIndex: number = 0;
     private vertexBuffers: VertexBuffer[] = [];
     private indexBuffer!: IndexBuffer;
 
 
-    constructor() {
+    constructor(public readonly shaderProgram: WebGLProgram) {
         super();
     }
+
     public bind(): void {
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.rendererID);
-    } public unbind(): void {
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.rendererID);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.rendererID);
+        this.indexBuffer.bind();
+    }
+    public unbind(): void {
+        this.indexBuffer.unbind();
     }
 
 
-    public addVertexBuffer(vertexBuffer: VertexBuffer) {
-        console.warn("Vertex Buffer has no layout!");
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.rendererID);
+    public addVertexBuffer(vertexBuffer: VertexBuffer): void {
         vertexBuffer.bind();
-
         const layout = vertexBuffer.getLayout();
+
         for (const element of layout.getElements()) {
-            gl.enableVertexAttribArray(this.vertexBufferIndex);
-            gl.vertexAttribPointer(this.vertexBufferIndex,
+            const attribLocation = gl.getAttribLocation(this.shaderProgram, element.name);
+            
+            gl.vertexAttribPointer(
+                attribLocation,
                 element.getComponentCount(),
                 Buffer.BufferElement.ShaderDataTypeToWebGLBaseType(element.type),
                 element.normalizd ? true : false,
-                layout.getStride(),
-                element.offset);
-            this.vertexBufferIndex++;
+                layout.getStride() * Float32Array.BYTES_PER_ELEMENT,
+                element.offset * Float32Array.BYTES_PER_ELEMENT
+            );
+
+
+            gl.enableVertexAttribArray(attribLocation);
         }
-
-        this.vertexBuffers.push(vertexBuffer);
     }
 
-    public setIndexBuffer(indexBuffer: IndexBuffer) {
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.rendererID);
-		indexBuffer.bind();
-
-		this.indexBuffer = indexBuffer;
+    public setIndexBuffer(indexBuffer: IndexBuffer): void {
+        this.indexBuffer = indexBuffer;
+        indexBuffer.bind();
     }
 
-    public getIndexBuffer() { 
+    public getVertexBuffers(): VertexBuffer[]  { 
+        return this.vertexBuffers;
+    }
+    public getIndexBuffer(): IndexBuffer {
         return this.indexBuffer;
+    }
+}
+
+export class FrameBuffer extends Buffer {
+
+    private static irretetor: number = 0;
+    public id: number;
+
+    public frameBufferId = gl.createFramebuffer();
+    constructor(
+        public frameTexture: WebGLTexture,
+    ){
+        super();
+        FrameBuffer.irretetor++;
+        this.id  = FrameBuffer.irretetor;
+    }
+
+
+    public bind(): void {
+        gl.bindFramebuffer(gl.COLOR_BUFFER_BIT, this.frameBufferId);
+    }
+    public unbind(): void {
+        throw new Error("Method not implemented.");
     }
 }

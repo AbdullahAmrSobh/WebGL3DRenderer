@@ -1,25 +1,25 @@
-export namespace Application { 
+export namespace Application {
     let lastUpdate: number = 0;
-    
+
     var updateQueue: CallableFunction[] = [];
-    export function addNewUpdate(update: CallableFunction): void{ 
+    export function addNewUpdate(update: CallableFunction): void {
         updateQueue.push(update);
     }
 
     export function onInit() {
-        
+
     }
-    
-    function Update(time: number) { 
+
+    function Update(time: number) {
         for (const update of updateQueue) {
-            update;
+            update(time);
         }
         lastUpdate = Date.now();
     }
 
 
-    export function Run() {
-        let loop = () => { 
+    export let Run = () => {
+        function loop() {
             var time: number = Date.now() - lastUpdate;
             Update(time);
             requestAnimationFrame(loop);
