@@ -1,0 +1,4 @@
+node_modules
+predist
+predist/**
+dist/bundle.js
