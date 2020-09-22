@@ -9,16 +9,11 @@ import { CubeGActor } from "Engine/Game/Scripts/CubeActor";
 import { Components } from "./Core/CoreComponents/Components";
 import { ActorManager } from "./Core/Actors";
 
-import * as image from "./assets/image.jpg";
+
 
 var _2dcanvas = document.getElementById("view_texture") as HTMLCanvasElement;
 var ctx = _2dcanvas.getContext("2d") as CanvasRenderingContext2D;
 
-let img = new Image();
-img.src = image.default;
-img.onload = function() {
-    ctx.drawImage(img, 0, 0);
-};
 
 //#region 
 var triangleVertices =
@@ -213,6 +208,11 @@ var fragmentShaderCubeText =
         '  gl_FragColor = vec4(fragColor, 1.0);',
         '}'
     ].join('\n');
+    
+import glsl from "./assets/shaders/DefaultFragmentShader.glsl!glsl"
+
+console.log("Hello world", glsl);
+
 //#endregion
 
 const flatColorShader = new Shader("flatColor", vertexShaderCubeText, fragmentShaderCubeText);

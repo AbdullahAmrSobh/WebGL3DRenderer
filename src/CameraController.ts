@@ -56,9 +56,6 @@ export class CameraController implements IUpdatableSystem {
         public direction: vec3,
         public oriantation: vec3
     ){ 
-
-        console.log(this.viewMatrix);
-
         this.viewMatrix = mat4.lookAt(
             this.viewMatrix,
             this.position,
