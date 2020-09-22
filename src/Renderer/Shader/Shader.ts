@@ -6,10 +6,10 @@ export namespace Unifroms {
         constructor(
             public name: string,
             public shader: Shader
-        ) {}        
+        ) { }
     }
 
-    export class UnifromLayout { 
+    export class UnifromLayout {
     }
 }
 
@@ -20,16 +20,16 @@ export class Shader {
         public name: string = "new_shader_" + Shader.count,
         vertexShaderSource: string,
         fragmentShaderSource: string,
-        ) {
-            Shader.count++;
-            this.shaderProgram = this.createDefaultShader(vertexShaderSource, fragmentShaderSource);
+    ) {
+        Shader.count++;
+        this.shaderProgram = this.createDefaultShader(vertexShaderSource, fragmentShaderSource);
     }
 
 
 
-    private createDefaultShader(vertexShaderSource: string, fragmentShaderSource: string): WebGLProgram{ 
+    private createDefaultShader(vertexShaderSource: string, fragmentShaderSource: string): WebGLProgram {
         const program: WebGLProgram = gl.createProgram() as WebGLProgram;
-        const vertexShader: any = gl.createShader(gl.VERTEX_SHADER);        
+        const vertexShader: any = gl.createShader(gl.VERTEX_SHADER);
         const fragShader: any = gl.createShader(gl.FRAGMENT_SHADER);
         gl.shaderSource(vertexShader, vertexShaderSource);
         gl.shaderSource(fragShader, fragmentShaderSource);
@@ -60,27 +60,27 @@ export class Shader {
         return program;
     }
 
-    public bind(): void { 
+    public bind(): void {
         gl.useProgram(this.shaderProgram);
     }
 
-    public unbind(): void { 
+    public unbind(): void {
         gl.useProgram(0);
     }
 }
 
 export namespace Shader {
 
-    export class UnifromElement { 
+    export class UnifromElement {
         constructor(
-            public name: string, 
+            public name: string,
             public type: string,
-            ){
+        ) {
 
-            }
+        }
     }
 
-    export class UnifromLayout { 
+    export class UnifromLayout {
         public unifroms: UnifromElement[] = [];
 
         public addUnifrom(unifrom: UnifromElement): void {
@@ -89,19 +89,19 @@ export namespace Shader {
     }
 }
 
-export class ShaderLibrary { 
+export class ShaderLibrary {
     private shaderNames: string[] = [];
     private shaders: Shader[] = [];
 
-    public add(shader: Shader) { 
+    public add(shader: Shader) {
         this.shaders.push(shader);
     }
 
     private currentShaderIndex: number = 0;
-    public get(name: string): Shader | null{
+    public get(name: string): Shader | null {
         this.currentShaderIndex = 0;
         for (const shader of this.shaders) {
-            if(this.shaderNames[this.currentShaderIndex] === name) {
+            if (this.shaderNames[this.currentShaderIndex] === name) {
                 return this.shaders[this.currentShaderIndex];
             }
             this.currentShaderIndex++;

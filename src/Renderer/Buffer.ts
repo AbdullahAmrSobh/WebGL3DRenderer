@@ -16,7 +16,7 @@ export namespace Buffer {
             public size: number = 0,
             public offset: number = 0,
             public normalizd: boolean = false
-        ) { 
+        ) {
 
             this.size = this.getComponentCount();
         }
@@ -42,17 +42,17 @@ export namespace Buffer {
 
         public static ShaderDataTypeToWebGLBaseType(type: ShaderDataType) {
             switch (type) {
-                case ShaderDataType.Float:  return gl.FLOAT;
+                case ShaderDataType.Float: return gl.FLOAT;
                 case ShaderDataType.Float2: return gl.FLOAT;
                 case ShaderDataType.Float3: return gl.FLOAT;
                 case ShaderDataType.Float4: return gl.FLOAT;
-                case ShaderDataType.Mat3:   return gl.FLOAT;
-                case ShaderDataType.Mat4:   return gl.FLOAT;
-                case ShaderDataType.Int:    return gl.INT;
-                case ShaderDataType.Int2:   return gl.INT;
-                case ShaderDataType.Int3:   return gl.INT;
-                case ShaderDataType.Int4:   return gl.INT;
-                case ShaderDataType.Bool:   return gl.BOOL;
+                case ShaderDataType.Mat3: return gl.FLOAT;
+                case ShaderDataType.Mat4: return gl.FLOAT;
+                case ShaderDataType.Int: return gl.INT;
+                case ShaderDataType.Int2: return gl.INT;
+                case ShaderDataType.Int3: return gl.INT;
+                case ShaderDataType.Int4: return gl.INT;
+                case ShaderDataType.Bool: return gl.BOOL;
             }
 
             console.log("Unknown ShaderDataType!");
@@ -95,7 +95,7 @@ export class VertexBuffer extends Buffer {
         public readonly size: number
     ) {
         super();
-        this.bufferObject =  gl.createBuffer() as WebGLBuffer;
+        this.bufferObject = gl.createBuffer() as WebGLBuffer;
         this.isBound = true;
 
         this.bind();
@@ -176,7 +176,7 @@ export class VertexArray extends Buffer {
 
         for (const element of layout.getElements()) {
             const attribLocation = gl.getAttribLocation(this.shaderProgram, element.name);
-            
+
             gl.vertexAttribPointer(
                 attribLocation,
                 element.getComponentCount(),
@@ -196,7 +196,7 @@ export class VertexArray extends Buffer {
         indexBuffer.bind();
     }
 
-    public getVertexBuffers(): VertexBuffer[]  { 
+    public getVertexBuffers(): VertexBuffer[] {
         return this.vertexBuffers;
     }
     public getIndexBuffer(): IndexBuffer {
@@ -212,10 +212,10 @@ export class FrameBuffer extends Buffer {
     public frameBufferId = gl.createFramebuffer();
     constructor(
         public frameTexture: WebGLTexture,
-    ){
+    ) {
         super();
         FrameBuffer.irretetor++;
-        this.id  = FrameBuffer.irretetor;
+        this.id = FrameBuffer.irretetor;
     }
 
 

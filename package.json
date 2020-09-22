@@ -5,16 +5,19 @@
   "private": true,
   "scripts": {
     "dev": "concurrently --kill-others \"webpack watch --dev\" \"tsc --watch\"",
-    "build": "webpack --config webpack.config.js"
+    "build": "webpack --config webpack.config.js",
+    "watchwp": "webpack --watch",
+    "watchts": "tsc --watch"
   },
   "author": "Abdullah Amr",
   "license": "ISC",
   "devDependencies": {
     "@types/gl-matrix": "^2.4.5",
+    "file-loader": "^6.1.0",
     "typescript": "^3.6.3",
-    "webpack": "^4.40.2",
-    "webpack-cli": "^3.3.9",
-    "webpack-dev-server": "^3.8.1"
+    "webpack": "^5.0.0-rc.0",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
   },
   "dependencies": {
     "gl-matrix": "^3.1.0"

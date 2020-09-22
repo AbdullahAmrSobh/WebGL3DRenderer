@@ -1,5 +1,5 @@
 import { vec3, mat4 } from "gl-matrix";
-import { Application } from "./application";
+import { IUpdatableSystem } from "./core/SystemsManager";
 
 
 
@@ -47,7 +47,7 @@ export namespace Projection {
     }
 }
 
-export class CameraController {
+export class CameraController implements IUpdatableSystem {
 
 
     public viewMatrix: mat4 = mat4.create();
@@ -66,7 +66,6 @@ export class CameraController {
             this.oriantation 
         );
 
-        Application.addNewUpdate(this.onUpdate);
     }
 
     public updateCameraMatrix(timestep: number): void {
@@ -78,8 +77,7 @@ export class CameraController {
         );
     }
 
-    public onUpdate(timestep: number): void { 
-
+    public update(timestep: number): void { 
         
     }
 }

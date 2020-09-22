@@ -1,19 +1,24 @@
 import { gl } from "Engine/gl";
 import { Buffer, VertexBuffer, VertexArray, IndexBuffer } from "Engine/Renderer/Buffer";
-
 import { Shader } from "Engine/Renderer/Shader/Shader";
-import { Application } from "./application";
+import { Engine } from "./Engine";
 import { mat4, glMatrix, vec3 } from "gl-matrix";
-import { RenderCommands } from "./Renderer/Renderer";
-
-
+import { RenderCommands, Renderer } from "./Renderer/Renderer";
 import { CameraController } from "Engine/CameraController"
-
-
-
 import { CubeGActor } from "Engine/Game/Scripts/CubeActor";
 import { Components } from "./Core/CoreComponents/Components";
+import { ActorManager } from "./Core/Actors";
 
+import * as image from "./assets/image.jpg";
+
+var _2dcanvas = document.getElementById("view_texture") as HTMLCanvasElement;
+var ctx = _2dcanvas.getContext("2d") as CanvasRenderingContext2D;
+
+let img = new Image();
+img.src = image.default;
+img.onload = function() {
+    ctx.drawImage(img, 0, 0);
+};
 
 //#region 
 var triangleVertices =
@@ -28,41 +33,77 @@ var triangleIndices = [1, 2, 3];
 var boxVertices =
     [ // X, Y, Z           R, G, B
         // Top
-        -1.0, 1.0, -1.0, 0.5, 0.5, 0.5,
-        -1.0, 1.0, 1.0, 0.5, 0.5, 0.5,
-        1.0, 1.0, 1.0, 0.5, 0.5, 0.5,
-        1.0, 1.0, -1.0, 0.5, 0.5, 0.5,
+        -1.0, 1.0, -1.0,  0.5, 0.5, 0.5,
+        -1.0, 1.0,  1.0,  0.5, 0.5, 0.5,
+         1.0, 1.0,  1.0,  0.5, 0.5, 0.5,
+         1.0, 1.0, -1.0,  0.5, 0.5, 0.5,
 
         // Left
-        -1.0, 1.0, 1.0, 0.75, 0.25, 0.5,
-        -1.0, -1.0, 1.0, 0.75, 0.25, 0.5,
+        -1.0,  1.0,  1.0, 0.75, 0.25, 0.5,
+        -1.0, -1.0,  1.0, 0.75, 0.25, 0.5,
         -1.0, -1.0, -1.0, 0.75, 0.25, 0.5,
-        -1.0, 1.0, -1.0, 0.75, 0.25, 0.5,
+        -1.0,  1.0, -1.0, 0.75, 0.25, 0.5,
 
         // Right
-        1.0, 1.0, 1.0, 0.25, 0.25, 0.75,
-        1.0, -1.0, 1.0, 0.25, 0.25, 0.75,
+        1.0,  1.0,  1.0, 0.25, 0.25, 0.75,
+        1.0, -1.0,  1.0, 0.25, 0.25, 0.75,
         1.0, -1.0, -1.0, 0.25, 0.25, 0.75,
-        1.0, 1.0, -1.0, 0.25, 0.25, 0.75,
+        1.0,  1.0, -1.0, 0.25, 0.25, 0.75,
 
         // Front
-        1.0, 1.0, 1.0, 1.0, 0.0, 0.15,
-        1.0, -1.0, 1.0, 1.0, 0.0, 0.15,
+         1.0,  1.0, 1.0, 1.0, 0.0, 0.15,
+         1.0, -1.0, 1.0, 1.0, 0.0, 0.15,
         -1.0, -1.0, 1.0, 1.0, 0.0, 0.15,
-        -1.0, 1.0, 1.0, 1.0, 0.0, 0.15,
+        -1.0,  1.0, 1.0, 1.0, 0.0, 0.15,
 
         // Back
-        1.0, 1.0, -1.0, 0.0, 1.0, 0.15,
-        1.0, -1.0, -1.0, 0.0, 1.0, 0.15,
+         1.0,  1.0, -1.0, 0.0, 1.0, 0.15,
+         1.0, -1.0, -1.0, 0.0, 1.0, 0.15,
         -1.0, -1.0, -1.0, 0.0, 1.0, 0.15,
-        -1.0, 1.0, -1.0, 0.0, 1.0, 0.15,
+        -1.0,  1.0, -1.0, 0.0, 1.0, 0.15,
 
         // Bottom
         -1.0, -1.0, -1.0, 0.5, 0.5, 1.0,
-        -1.0, -1.0, 1.0, 0.5, 0.5, 1.0,
-        1.0, -1.0, 1.0, 0.5, 0.5, 1.0,
-        1.0, -1.0, -1.0, 0.5, 0.5, 1.0,
+        -1.0, -1.0,  1.0, 0.5, 0.5, 1.0,
+         1.0, -1.0,  1.0, 0.5, 0.5, 1.0,
+         1.0, -1.0, -1.0, 0.5, 0.5, 1.0,
     ];
+
+var CubeVertcies = 
+[
+
+    // X, Y, Z         
+ // Top
+ -1.0, 1.0, -1.0, 
+ -1.0, 1.0,  1.0, 
+  1.0, 1.0,  1.0, 
+  1.0, 1.0, -1.0, 
+ // Left
+ -1.0,  1.0,  1.0,
+ -1.0, -1.0,  1.0,
+ -1.0, -1.0, -1.0,
+ -1.0,  1.0, -1.0,
+ // Right
+ 1.0,  1.0,  1.0, 
+ 1.0, -1.0,  1.0, 
+ 1.0, -1.0, -1.0, 
+ 1.0,  1.0, -1.0, 
+ // Front
+  1.0,  1.0, 1.0, 
+  1.0, -1.0, 1.0, 
+ -1.0, -1.0, 1.0, 
+ -1.0,  1.0, 1.0, 
+ // Back
+  1.0,  1.0, -1.0,
+  1.0, -1.0, -1.0,
+ -1.0, -1.0, -1.0,
+ -1.0,  1.0, -1.0,
+ // Bottom
+ -1.0, -1.0, -1.0,
+ -1.0, -1.0,  1.0,
+  1.0, -1.0,  1.0,
+  1.0, -1.0, -1.0,
+];
 
 var boxIndices =
     [
@@ -92,7 +133,7 @@ var boxIndices =
     ];
 //#endregion
 
-
+let actorManager: ActorManager = new ActorManager();
 
 let cubeMesh: Components.StaticMesh = { 
     vertcies: boxVertices,
@@ -107,6 +148,15 @@ let mainCamera = new CameraController(
     vec3.fromValues(0,0,0),
     vec3.fromValues(0,1,0),
 );
+
+actorManager.registerActor(cube);
+
+
+let game = new Engine(gl);
+
+game.registerNewSystem(actorManager);
+game.registerNewSystem(mainCamera);
+
 
 //#region 
 var vertexShaderText =
@@ -181,9 +231,6 @@ vao_triangle.setIndexBuffer(ibo_triangle);
 vao_triangle.unbind();
 
 
-
-
-
 const vao = new VertexArray(program);
 const bufferLayout = new Buffer.BufferLayout([
     new Buffer.BufferElement("vertPosition", Buffer.ShaderDataType.Float3),
@@ -196,15 +243,11 @@ vao.addVertexBuffer(vbo);
 vao.setIndexBuffer(ibo);
 vao.unbind();
 
-
-
-
 const cubeBufferLayout = new Buffer.BufferLayout([
     new Buffer.BufferElement("vertPosition", Buffer.ShaderDataType.Float3),
     new Buffer.BufferElement("vertColor", Buffer.ShaderDataType.Float3)
 ]);
 const cubeVAO = RenderCommands.uploadObject(cubeMesh, cubeBufferLayout, program);
-
 
 flatColorShader.bind();
 var viewMatrix = mainCamera.viewMatrix;
@@ -213,7 +256,7 @@ var projMatrix = mat4.perspective(mat4.create(), glMatrix.toRadian(45), gl.canva
 
 RenderCommands.initRenderer();
 
-Application.addNewUpdate(function (time: number) {
+game.registerNewTask(function (time: number) {
     gl.clearColor(0.75, 0.85, 0.8, 1.0);
     gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
 
@@ -224,10 +267,11 @@ Application.addNewUpdate(function (time: number) {
     });
 
     RenderCommands.Submit(flatColorShader, cubeVAO, {
-        model: mat4.create(),
+        model: cube.modelMatrix,
         view: viewMatrix,
         proj: projMatrix
     });
 });
 
-Application.Run();
+
+game.run();
