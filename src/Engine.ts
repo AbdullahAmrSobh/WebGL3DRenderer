@@ -1,15 +1,14 @@
 import { IUpdatableSystem } from "Engine/core/SystemsManager";
 
-
 export class Engine {
     private lastUpdate: number = 0;
-
     private runningSystems: IUpdatableSystem[] = [];
     private runningTasks: CallableFunction[] = [];
 
     constructor(renderingContext: WebGLRenderingContext) {
 
     }
+    
     public onInit(context: WebGLRenderingContext): void {
 
     }
@@ -34,7 +33,6 @@ export class Engine {
 
         this.lastUpdate = Date.now();
     }
-
 
     public run(): void {
         let that = this;
