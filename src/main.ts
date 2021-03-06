@@ -16,11 +16,10 @@ import * as triangleMeshData from "Models/triangle.json";
 import * as defaultGlslShaderSource from "Shaders/defaultPipelineShader.glsl"; 
 import * as primativeGlslShaderSource from "Shaders/primitivePipelineShader.glsl";
 
-import * as defaultNoiseTexture from "Textures/noise.png";
-console.log(defaultNoiseTexture.default);
 
 let defaultPipelineShader = defaultGlslShaderSource.default.split("//<<StageEnd>>");
 let primativePipelineShader = primativeGlslShaderSource.default.split("//<<StageEnd>>");
+console.log(defaultPipelineShader[1]);
 
 let actorManager: ActorManager = new ActorManager();
 
